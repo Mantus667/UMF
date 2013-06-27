@@ -1,0 +1,43 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<UMF.Models.UMFCreateDiscussionModel>
+@using UMF.Controllers
+@using System.Web.Mvc
+
+@{
+    Html.EnableClientValidation(true);
+    Html.EnableUnobtrusiveJavaScript(true);
+}
+
+@using (Html.BeginUmbracoForm<UMFSurfaceController>("HandleCreateDiscussion", null, new { @class = "form form-horizontal" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.parent)
+    @Html.HiddenFor(model => model.id)
+
+    <fieldset>
+        <legend>Create Discussion</legend>
+
+        
+		<div class="control-group">
+            <label for="name" class="control-label">@Umbraco.GetDictionaryValue("UMF_CreateDiscussionName")</label>
+            <div class="controls">
+                @Html.TextBoxFor(model => model.name, new { @class = "input-xxlarge" })
+                @Html.ValidationMessageFor(model => model.name)
+            </div>
+        </div>
+                
+        <div class="control-group">
+            <label for="text" class="control-label">@Umbraco.GetDictionaryValue("UMF_CreateDiscussionText")</label>
+            <div class="controls">
+                @Html.TextAreaFor(model => model.text, new { @class = "input-xxlarge ckeditor" })
+                @Html.ValidationMessageFor(model => model.text)
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <input type="submit" class="btn btn-primary" value="@Umbraco.GetDictionaryValue("UMF_Create")" />
+            <a href="@Umbraco.TypedContent(Model.parent).Url" class="btn">@Umbraco.GetDictionaryValue("UMF_Cancel")</a>
+        </div>
+        
+    </fieldset>
+}

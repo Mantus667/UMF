@@ -1,0 +1,130 @@
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+
+.umf_group
+{
+    min-height: 20px;
+    padding: 19px;
+    margin-bottom: 20px; /* -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.05); -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.05); box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);*/
+}
+.umf_group > header
+{
+    background-color: rgba(75,137,178, 1);
+    border: 1px solid rgba(58,106,138,1);
+    color: White;
+    padding: 0px 5px;
+}
+.umf_group > header > h2
+{
+    margin: 0;
+}
+.umf_group > table
+{
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+}
+.umf_group p
+{
+    margin: 0;
+}
+
+.umf_group h4
+{
+    margin-top: 0;
+}
+
+.field-validation-error
+{
+    color: Red;
+}
+.input-validation-error
+{
+    border-color: Red !important;
+}
+
+.umf_discussion > header, .umf_discussion > footer
+{
+    background-color: rgba(75,137,178, 1);
+    border: 1px solid rgba(58,106,138,1);
+    color: White;
+    padding: 0px 5px;
+}
+.umf_discussion > .mainContent
+{
+    border-radius: 0;
+}
+.umf_discussion > .mainContent > aside.well
+{
+    background-color: White;
+}
+.umf_discussion > .mainContent > aside > *
+{
+    margin: 4px auto;
+    text-align: center;
+    display: block;
+}
+
+.umf_answer
+{
+    margin-bottom: 10px;
+}
+.umf_answer > .mainContent
+{
+    margin-bottom: 0;
+}
+.umf_answer.isAnswer > header
+{
+    background-color: #5bb75b;
+    border-color: #5bb75b;
+}
+.umf_answer > header > .btn.btn-mini.btn-success.pull-right
+{
+    margin-left: 10px;
+}
+
+#custom-search-form
+{
+    margin: 0;
+    margin-top: 5px;
+    padding: 0;
+}
+
+#custom-search-form .search-query
+{
+    padding-right: 3px;
+    padding-right: 4px \9;
+    padding-left: 3px;
+    padding-left: 4px \9; /* IE7-8 doesn't have border-radius, so don't indent the padding */
+    margin-bottom: 0;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+#custom-search-form button
+{
+    border: 0;
+    background: none; /** belows styles are working good */
+    padding: 2px 5px;
+    margin-top: 2px;
+    position: relative;
+    left: -28px; /* IE7-8 doesn't have border-radius, so don't indent the padding */
+    margin-bottom: 0;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.search-query:focus + button
+{
+    z-index: 3;
+}
+
+.star
+{
+    margin-left: 70px;
+}

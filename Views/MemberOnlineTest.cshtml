@@ -1,0 +1,22 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@using umbraco.cms.businesslogic.member
+@{
+    Layout = null;
+	List<MembershipUser> onlineUsers = new List<MembershipUser>();
+	foreach(MembershipUser user in Membership.GetAllUsers())
+	{ 
+		if(user.IsOnline)
+		{ 
+			onlineUsers.Add(user);
+		}
+	}
+}
+
+<ul>
+	@foreach(var tmp in onlineUsers) {
+		var member = new Member((int)tmp.ProviderUserKey);
+		<li>
+			@member.LoginName
+		</li>
+	}
+</ul>

@@ -1,0 +1,124 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@{
+    Layout = "UMF_Master.cshtml";
+    var numAnswers = Umbraco.Field("discussionsPerPage", recursive: true);
+}
+
+@section JavaScript {
+    <script src="@Url.Content("~/scripts/UMF/jquery.raty.min.js")" type="text/javascript"></script>
+<script type="text/javascript">
+        $(document).ready(function () {
+
+            //Raty
+            $('.star').raty({
+              score: function() {
+                return $(this).attr('data-score');
+              },
+              readOnly  : true,
+              noRatedMsg: "@Umbraco.GetDictionaryValue("UMF_NoRatingYet")",
+              path: '/img/'
+            });
+
+            //how much items per page to show
+            var show_per_page = @numAnswers;
+            //getting the amount of elements inside content div
+            var number_of_items = $('.table > tbody').children().size();
+            //calculate the number of pages we are going to have
+            var number_of_pages = Math.ceil(number_of_items / show_per_page);
+
+            //set the value of our hidden input fields
+            $('#current_page').val(0);
+            $('#show_per_page').val(show_per_page);
+
+            var navigation_html = '<ul>';
+
+            navigation_html += '<li class="previous_link">';
+            navigation_html += '<a href="javascript:previous();">&larr; Previous</a>';
+            navigation_html += '</li>';
+            var current_link = 0;
+            while (number_of_pages > current_link) {
+                navigation_html += '<li class="page_link" id="id' + current_link + '">';
+                navigation_html += '<a href="javascript:go_to_page(' + current_link + ')" longdesc="' + current_link + '">' + (current_link + 1) + '</a>';
+                current_link++;
+                navigation_html += '</li>';
+            }
+            navigation_html += '<li>';
+            navigation_html += '<a class="next_link" href="javascript:next();">Next &rarr;</a>';
+            navigation_html += '</li>';
+            navigation_html += '</ul>';
+
+            $('div.pagination').html(navigation_html);
+
+            //add active class to the first page link
+            $('div.pagination .page_link:first').addClass('active');
+
+            //hide all the elements inside content div
+            $('.table > tbody').children().css('display', 'none');
+
+            //and show the first n (show_per_page) elements
+            $('.table > tbody').children().slice(0, show_per_page).css('display', 'table-row');
+        });
+
+        function previous() {
+            new_page = parseInt($('#current_page').val()) - 1;
+            //if there is an item before the current active link run the function
+            if ($('.active').prev('.page_link').length == true) {
+                go_to_page(new_page);
+            }
+
+        }
+
+        function next() {
+            new_page = parseInt($('#current_page').val()) + 1;
+            //if there is an item after the current active link run the function
+            if ($('.active').next('.page_link').length == true) {
+                go_to_page(new_page);
+            }
+
+        }
+
+        function go_to_page(page_num) {
+            //get the number of items shown per page
+            var show_per_page = parseInt($('#show_per_page').val());
+            var number_of_items = $('.table > tbody').children().size();
+            //calculate the number of pages we are going to have
+            var number_of_pages = Math.ceil(number_of_items / show_per_page);
+
+            //get the element number where to start the slice from
+            start_from = page_num * show_per_page;
+
+            //get the element number where to end the slice
+            end_on = start_from + show_per_page;
+
+            activate_id = page_num;
+            var get_box = document.getElementById("id" + page_num);
+            //hide all children elements of content div, get specific items and show them
+            $('.table > tbody').children().css('display', 'none').slice(start_from, end_on).css('display', 'table-row');
+
+            //hide the right nav links
+            var count1 = page_num - 5;
+            var count2 = page_num + 5;
+            var start = (count1 < 0) ? 0 : count1;
+            start = (number_of_pages - 10 < start) ? number_of_pages - 10 : start;
+            var end = (count2 < show_per_page) ? show_per_page : count2;
+            end = (end > number_of_pages) ? number_of_pages : end;
+            $('.page_link').hide().slice(start, end).css('display', 'inline');
+
+            /*get the page link that has longdesc attribute of the current page and add active class to it
+            and remove that class from previously active page link*/
+            $("div.pagination").find('li.active').removeClass("active");
+            $(get_box).addClass("active");
+
+
+            //update the current page input field
+            $('#current_page').val(page_num);
+        }
+    </script>
+}
+
+<div class="container">
+    <input type="hidden" id="show_per_page" value="" />
+    <input type="hidden" id="current_page" value="" />
+    @Html.Action("GetCategory", "UMFSurface", new { area = "UMF", Model.Content.Id })
+    <div class="pagination pagination-centered"></div>
+</div>

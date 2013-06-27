@@ -1,0 +1,37 @@
+﻿ @inherits Umbraco.Web.Mvc.UmbracoViewPage<List<UMF.Models.UMFGroupModel>>
+ 
+ @foreach (var group in Model)
+ {
+    <div class="umf_group">
+        <header>
+            <h2>@group.name</h2>
+        </header>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@Umbraco.GetDictionaryValue("UMF_Name")</th>
+                    <th>@Umbraco.GetDictionaryValue("UMF_Created")</th>
+                    <th>@Umbraco.GetDictionaryValue("UMF_LatestDiscussion")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in group.Categorys)
+                {
+                    <tr>
+                        <td>
+                            <h4><a href="@category.url">@category.name</a></h4>
+                            <p>@category.number_of_discussion @Umbraco.GetDictionaryValue("UMF_Discussions"), @category.number_of_answers @Umbraco.GetDictionaryValue("UMF_Answers")</p>
+                        </td>
+                        <td>@category.created</td>
+                        <td>
+                            @if (null != category.latest_discussion)
+                            {
+                                <a href="@category.latest_discussion.url">@category.latest_discussion.name</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+ }

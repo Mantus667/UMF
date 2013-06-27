@@ -1,0 +1,148 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<UMF.Models.UMFDiscussionDetailModel>
+@using System.Security.Cryptography
+@using System.Text
+
+@{
+    var typedNode = Umbraco.TypedContent(Model.id);
+    string edit_url = typedNode.AncestorOrSelf("UMF_Root").Children.FirstOrDefault(x => x.DocumentTypeAlias == "UMF_CreateDiscussion").Url + "?category=" + typedNode.Parent.Id + "&discussion=" + Model.id;
+    var GuestsAllowed = Umbraco.Field("onlyRegisteredUsersCanPostAnswers", recursive: true);
+    bool OnlyRegistered = true, allowRating = false;
+    bool.TryParse(typedNode.AncestorOrSelf("UMF_Root").GetPropertyValue("onlyRegisteredUsersCanPostAnswers").ToString(), out OnlyRegistered);
+    bool.TryParse(typedNode.AncestorOrSelf("UMF_Root").GetPropertyValue("allowRatingOfDiscussions").ToString(), out allowRating);
+}
+
+<input type="hidden" id="show_per_page" value="" />
+<input type="hidden" id="current_page" value="" />
+
+ <div class="row-fluid">
+    <div class="span3">
+        <a href="@Umbraco.TypedContent(Model.id).Parent.Url" class="btn btn-info">@Umbraco.GetDictionaryValue("UMF_Back")</a>
+    </div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        var member = Membership.GetUser();
+        <div class="span1 pull-right">
+            @if (member != null && Model.writer != null && Model.writer.Id == int.Parse(member.ProviderUserKey.ToString()))
+            {
+                <a href="@edit_url" class="btn"><i class="icon-pencil"></i> @Umbraco.GetDictionaryValue("UMF_Edit")</a>
+            }
+        </div>
+    }
+ </div>
+ <br />
+<div class="row-fluid">
+    <article class="umf_discussion">
+        <header>
+            <div class="row-fluid">
+                <h2 class="span6">@Model.name</h2>
+                <div class="span2 pull-right">
+                    @if (allowRating)
+                    {
+                        <div class="star" data-score="@Model.rating"></div>
+                        <div class="span12" id="RatingMessage"></div>
+                    }
+                </div>
+            </div>
+            @if (Model.writer != null)
+            {
+                <small>@Umbraco.GetDictionaryValue("UMF_WrittenBy") @Model.writer.LoginName @Umbraco.GetDictionaryValue("UMF_ON") @Model.created</small>
+            }
+        </header>
+        <div class="clearfix well mainContent">
+            @if (Model.writer != null)
+            {
+                <aside class="span2 well">
+                    <img src="http://www.gravatar.com/avatar/@GetGravatarHash(Model.writer.Email)" />
+                    <p class="label label-info">@Model.writer.getProperty("numberOfPosts").Value Posts</p>
+                    <p class="label label-info">@Model.writer.getProperty("karma").Value Karma</p>
+                </aside>
+            }
+            <div class="span10">
+                @Html.Raw(Model.text)
+            </div>
+        </div>
+    </article>
+    <section id="answers">
+    @foreach (var answer in Model.answers)
+    {
+        string css = (answer.isAnswer) ? "isAnswer" : String.Empty;
+        <article class="umf_discussion umf_answer @css">
+            @if (User.Identity.IsAuthenticated)
+            {
+                var edit_answer_url = typedNode.Url + "?answer=" + answer.id;
+                var member = Membership.GetUser();
+                <header>
+                    @if (member != null && int.Parse(member.ProviderUserKey.ToString()) == Model.writer.Id && !Model.hasAnswer)
+                    {
+                        @Html.ActionLink(Umbraco.GetDictionaryValue("UMF_MarkAsAnswer"), "MarkAsAnswer", new { area = "UMF", answer = answer.id, discussion = Model.id }, new { @class = "btn btn-mini btn-success pull-right" })
+                    }
+                    @if (member != null && int.Parse(member.ProviderUserKey.ToString()) == answer.writer.Id)
+                    {
+                        <a href="@edit_answer_url" class="btn btn-mini btn-primary pull-right"><i class="icon-pencil"></i> @Umbraco.GetDictionaryValue("UMF_Edit")</a>
+                    }
+                </header>
+            }
+            <div class="clearfix well mainContent">
+                @if (answer.writer != null)
+                {
+                    <aside class="span2 well">
+                        <img src="http://www.gravatar.com/avatar/@GetGravatarHash(answer.writer.Email)" alt="@answer.writer.LoginName" />
+                        <p class="label label-info">@answer.writer.getProperty("numberOfPosts").Value Posts</p>
+                        <p class="label label-info">@Model.writer.getProperty("karma").Value Karma</p>
+                    </aside>
+                }
+                <div class="span10">
+                    @Html.Raw(answer.text)
+                </div>
+            </div>
+            <footer>
+                @if (answer.writer != null)
+                {
+                    <small>@Umbraco.GetDictionaryValue("UMF_WrittenBy") @answer.writer.LoginName @Umbraco.GetDictionaryValue("UMF_ON") @answer.created</small>
+                }
+            </footer>
+        </article>
+    }
+    </section>
+</div>
+<div id="AnswerPaging">
+    <div class="pagination pagination-centered"></div>
+</div>
+<section id="answer_form">
+    @if (!OnlyRegistered || User.Identity.IsAuthenticated)
+    {
+        if (Request.QueryString.AllKeys.Contains("answer"))
+        {
+            @Html.Action("RenderCreateAnswer", new { area = "UMF", parent = Model.id, answer = Request.QueryString["answer"] })
+        }
+        else
+        {
+            @Html.Action("RenderCreateAnswer", new { area = "UMF", parent = Model.id })
+        }
+    }
+</section>
+
+@functions {
+    public string GetGravatarHash(string email)
+    {
+        if (String.IsNullOrEmpty(email))
+            email = "meu@email.com";
+
+        // Create a new instance of the MD5CryptoServiceProvider object.
+        var md5Hasher = MD5.Create();
+
+        // Convert the input string to a byte array and compute the hash.
+        byte[] data = md5Hasher.ComputeHash(Encoding.Default.GetBytes(email));
+
+        // Create a new Stringbuilder to collect the bytes
+        // and create a string.
+        var sBuilder = new StringBuilder();
+
+        // Loop through each byte of the hashed data
+        // and format each one as a hexadecimal string.
+        for (var i = 0; i < data.Length; i++)
+            sBuilder.Append(data[i].ToString("x2"));
+
+        return sBuilder.ToString();
+    }
+}
