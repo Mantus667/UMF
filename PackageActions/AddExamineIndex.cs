@@ -36,7 +36,7 @@ namespace UMF.PackageActions
 	             if (xmlData.HasChildNodes)
 	             {
 	                 // Open the examine index file
-	                 XmlDocument examineIndexFile = umbraco.xmlHelper.OpenAsXmlDocument(VirtualPathUtility.ToAbsolute("~/config/ExamineIndex.config"));
+	                 XmlDocument examineIndexFile = Umbraco.Core.XmlHelper.OpenAsXmlDocument(VirtualPathUtility.ToAbsolute("~/config/ExamineIndex.config"));
 	  
 	                 // Select ExamineLuceneIndexSets node in the config file
 	                 XmlNode examineLuceneIndexSetsNode = examineIndexFile.SelectSingleNode("//ExamineLuceneIndexSets");
@@ -72,7 +72,7 @@ namespace UMF.PackageActions
 	             if (xmlData.HasChildNodes)
 	             {
 	                 // Open the examine index file
-	                 XmlDocument examineIndexFile = umbraco.xmlHelper.OpenAsXmlDocument(VirtualPathUtility.ToAbsolute("~/config/ExamineIndex.config"));
+	                 XmlDocument examineIndexFile = Umbraco.Core.XmlHelper.OpenAsXmlDocument(VirtualPathUtility.ToAbsolute("~/config/ExamineIndex.config"));
 	  
 	                 // Select ExamineLuceneIndexSets node in the config file
 	                 XmlNode examineLuceneIndexSetsNode = examineIndexFile.SelectSingleNode("//ExamineLuceneIndexSets");

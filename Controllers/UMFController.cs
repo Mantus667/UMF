@@ -46,17 +46,52 @@ namespace UMF.Controllers
                         id = category.Id,
                         name = category.Name,
                         created = category.CreateDate
-
                     };
 
+                    //Does the user have access
+                    try
+                    {
+                        bool onlySpecialGroup = false, inGroup = false;
+                        onlySpecialGroup = Convert.ToBoolean(int.Parse(category.GetValue("allowOnlySpecialGroups").ToString()));
+                        if (onlySpecialGroup)
+                        {
+                            tmp2.hasAccess = false;
+                            foreach (string val in category.GetValue("allowedGroups").ToString().Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                var member = Membership.GetUser();
+                                if (member != null)
+                                {
+                                    var mem_group = MemberGroup.GetByName(val);
+                                    inGroup = mem_group.HasMember((int)member.ProviderUserKey);
+                                    if (inGroup)
+                                    {
+                                        tmp2.hasAccess = true;
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    tmp2.hasAccess = false;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            tmp2.hasAccess = true;
+                        }
+                    }
+                    catch { tmp2.hasAccess = true; }
+
+                    //Check number of Answers and number of discussions
                     try
                     {
                         tmp2.number_of_answers = cs.GetDescendants(category).Where(x => x.ContentType.Alias == "UMF_Answer").Count();
                         tmp2.number_of_discussion = cs.GetDescendants(category).Where(x => x.ContentType.Alias == "UMF_Discussion").Count();
                         tmp2.url = helper.TypedContent(category.Id).Url;
                     }
-                    catch (Exception ex) { }
+                    catch { }
 
+                    //Try to get the latest discussion
                     try
                     {
                         var latest_discussion = cs.GetChildren(category.Id).OrderByDescending(x => x.CreateDate).FirstOrDefault();
@@ -68,7 +103,7 @@ namespace UMF.Controllers
                             url = helper.TypedContent(latest_discussion.Id).Url
                         };
                     }
-                    catch (Exception ex) { }
+                    catch { }
 
                     tmp.Categorys.Add(tmp2);
                 }
@@ -158,7 +193,7 @@ namespace UMF.Controllers
                 int.TryParse(discussion.GetValue("voteScore").ToString(), out score);
                 rating = (int)Math.Round((decimal)(score / votes), 0);
             }
-            catch (Exception ex) { }
+            catch { }
             model.rating = rating;
             int userId = 0;
             try
@@ -166,14 +201,18 @@ namespace UMF.Controllers
                 userId = Convert.ToInt32(discussion.GetValue("userId").ToString().Trim());
                 if (userId != 0)
                 {
-                    model.writer = new Member(userId);
+                    try
+                    {
+                        model.writer = Member.GetAllAsList().SingleOrDefault(x => x.Id == userId);
+                    }
+                    catch { model.writer = null; }
                 }
                 else
                 {
                     model.writer = null;
                 }
             }
-            catch (Exception ex) { model.writer = null; }
+            catch { model.writer = null; }
             
             model.answers = new List<UMFAnswerModel>();
 
@@ -186,7 +225,7 @@ namespace UMF.Controllers
                     int.TryParse(answer.GetValue("voteScore").ToString(), out score);
                     rating = (int)Math.Round((decimal)(score / votes), 0);
                 }
-                catch (Exception ex) { }
+                catch { }
                 var answerm = new UMFAnswerModel(){
                     id = answer.Id,
                     name = answer.Name,
@@ -199,7 +238,11 @@ namespace UMF.Controllers
                 int.TryParse(answer.GetValue("userId").ToString().Trim(), out auserId);
                 if (auserId != 0)
                 {
-                    answerm.writer = new Member(auserId);
+                    try
+                    {
+                        answerm.writer = Member.GetAllAsList().SingleOrDefault(x => x.Id == userId);
+                    }
+                    catch { answerm.writer = null; }
                 }
                 else
                 {
@@ -250,7 +293,7 @@ namespace UMF.Controllers
             {
                 int.TryParse(Membership.GetUser().ProviderUserKey.ToString(), out userId);
             }
-            catch (Exception ex) { }
+            catch { }
 
             //Check if its a new discussion or one gets updated
             if (model.id == 0)
@@ -338,7 +381,7 @@ namespace UMF.Controllers
             {
                 int.TryParse(Membership.GetUser().ProviderUserKey.ToString().Trim(), out userId);
             }
-            catch (Exception ex) { }
+            catch { }
 
             //Check if its a new one or it gets updated
             if (model.id == 0)
@@ -417,7 +460,6 @@ namespace UMF.Controllers
 
             foreach (var result in searchResults)
             {
-                //Debug.WriteLine(result.ToString());
                 var node = Umbraco.TypedContent(result.Fields["id"]);
                 string url = (node.DocumentTypeAlias == "UMF_Answer") ? node.Parent.UrlWithDomain().ToString() : node.UrlWithDomain().ToString();
                 UMFSearchResultModel model = new UMFSearchResultModel() {
@@ -454,7 +496,7 @@ namespace UMF.Controllers
 
                 return PartialView("UMFRatingSuccess");
             }
-            catch (Exception ex) {
+            catch {
                 return PartialView("UMFRatingError");
             }
         }

@@ -104,7 +104,7 @@ namespace UMF.Controllers.SurfaceControllers
                                 checkMember.getProperty("hostNameOfLastLogin").Value = hostName;
                                 checkMember.getProperty("IPofLastLogin").Value = clientIPAddress;
                             }
-                            catch (Exception ex) { }
+                            catch { }
 
                             //Save the details
                             checkMember.Save();

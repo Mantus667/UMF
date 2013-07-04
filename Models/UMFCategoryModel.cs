@@ -13,6 +13,7 @@ namespace UMF.Models
         public string url { get; set; }
         public int number_of_discussion { get; set; }
         public int number_of_answers { get; set; }
+        public bool hasAccess { get; set; }
         public UMFLatestDiscussionModel latest_discussion { get; set; }
     }
 

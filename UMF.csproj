@@ -221,11 +221,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code\EmailHelper.cs" />
-    <Compile Include="Code\Helpers.cs" />
-    <Compile Include="Code\UmbracoStartup.cs" />
-    <Compile Include="Controllers\SurfaceControllers\AuthSurfaceController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\ProfileSurfaceController.cs" />
     <Compile Include="Controllers\UMFController.cs" />
     <Compile Include="Models\AuthModel.cs" />
     <Compile Include="Models\ProfileModel.cs" />
@@ -240,6 +235,13 @@
     <Compile Include="PackageActions\AddExamineIndexProvider.cs" />
     <Compile Include="PackageActions\AddExamineSearchProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="usercontrols\UMF_MemberGroupPicker.ascx.cs">
+      <DependentUpon>UMF_MemberGroupPicker.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="usercontrols\UMF_MemberGroupPicker.ascx.designer.cs">
+      <DependentUpon>UMF_MemberGroupPicker.ascx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\FilterConfig.cs" />
@@ -249,7 +251,6 @@
   <ItemGroup>
     <Folder Include="App_Code\" />
     <Folder Include="App_Data\" />
-    <Folder Include="usercontrols\" />
     <Folder Include="Views\Home\" />
     <Folder Include="Views\MacroPartials\" />
     <Folder Include="Views\Partials\" />
@@ -3261,6 +3262,7 @@
     <Content Include="umbraco_client\Ui\ui-lightness\images\ui-icons_ffd27a_256x240.png" />
     <Content Include="umbraco_client\Ui\ui-lightness\images\ui-icons_ffffff_256x240.png" />
     <Content Include="umbraco_client\Ui\ui-lightness\jquery-ui.custom.css" />
+    <Content Include="usercontrols\UMF_MemberGroupPicker.ascx" />
     <Content Include="xslt\dummy.txt" />
   </ItemGroup>
   <ItemGroup>
