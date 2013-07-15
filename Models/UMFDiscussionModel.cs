@@ -29,6 +29,7 @@ namespace UMF.Models
         public string text { get; set; }
         public bool hasAnswer { get; set; }
         public int rating { get; set; }
+        public int hits { get; set; }
         public Member writer { get; set; }
         public List<UMFAnswerModel> answers { get; set; }
     }

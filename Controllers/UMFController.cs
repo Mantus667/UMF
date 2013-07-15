@@ -131,7 +131,7 @@ namespace UMF.Controllers
             model.name = category.Name;
             model.discussions = new List<UMFDiscussionOverviewModel>();
 
-            foreach (var disc in cs.GetChildren(id))
+            foreach (var disc in cs.GetChildren(id).OrderByDescending(x => x.CreateDate).OrderByDescending(x => x.GetValue("sticky").ToString() == "1"))
             {
                 UMFDiscussionOverviewModel tmp = new UMFDiscussionOverviewModel();
                 tmp.id = disc.Id;
@@ -186,7 +186,7 @@ namespace UMF.Controllers
             model.text = discussion.GetValue("bodyText").ToString();
             model.created = discussion.CreateDate;
             model.hasAnswer = (null != cs.GetChildren(id).FirstOrDefault(x => null != x.GetValue("isAnswer") && x.GetValue("isAnswer").ToString() == "1")) ? true : false;
-            int score = 0, votes = 0, rating = 0;
+            int score = 0, votes = 0, rating = 0, hits = 0;
             try
             {
                 int.TryParse(discussion.GetValue("timesRated").ToString(), out votes);
@@ -195,6 +195,16 @@ namespace UMF.Controllers
             }
             catch { }
             model.rating = rating;
+
+            try
+            {
+                int.TryParse(discussion.GetValue("hits").ToString(), out hits);
+            }
+            catch { }
+            discussion.SetValue("hits", hits + 1);
+            cs.SaveAndPublish(discussion);
+            model.hits = hits + 1;
+
             int userId = 0;
             try
             {

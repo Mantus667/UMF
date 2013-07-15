@@ -79,7 +79,7 @@
             var navigation_html = '<ul>';
 
             navigation_html += '<li class="previous_link">';
-            navigation_html += '<a href="javascript:previous();">&larr; Previous</a>';
+            navigation_html += '<a href="javascript:previous();">&larr; @Umbraco.GetDictionaryValue("UMF_PagingPrevious")</a>';
             navigation_html += '</li>';
             var current_link = 0;
             while (number_of_pages > current_link) {
@@ -89,7 +89,7 @@
                 navigation_html += '</li>';
             }
             navigation_html += '<li>';
-            navigation_html += '<a class="next_link" href="javascript:next();">Next &rarr;</a>';
+            navigation_html += '<a class="next_link" href="javascript:next();">@Umbraco.GetDictionaryValue("UMF_PagingNext") &rarr;</a>';
             navigation_html += '</li>';
             navigation_html += '</ul>';
 

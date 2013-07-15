@@ -221,6 +221,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Code\EmailHelper.cs" />
+    <Compile Include="Code\Helpers.cs" />
+    <Compile Include="Code\UmbracoStartup.cs" />
+    <Compile Include="Controllers\SurfaceControllers\AuthSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\ProfileSurfaceController.cs" />
     <Compile Include="Controllers\UMFController.cs" />
     <Compile Include="Models\AuthModel.cs" />
     <Compile Include="Models\ProfileModel.cs" />
