@@ -13,6 +13,8 @@ using Umbraco.Core.Models;
 using Examine;
 using System.Diagnostics;
 using Examine.SearchCriteria;
+using Umbraco.Core.Logging;
+using System.Globalization;
 
 namespace UMF.Controllers
 {
@@ -110,7 +112,7 @@ namespace UMF.Controllers
                 groups.Add(tmp);
             }
 
-            return PartialView("UMFOverview",groups);
+            return PartialView("UMF_Overview",groups);
         }
 
         /// <summary>
@@ -148,7 +150,8 @@ namespace UMF.Controllers
                 }
                 catch { }
                 tmp.rating = rating;
-                int userId = int.Parse(disc.GetValue("userId").ToString());
+                int userId = 0;
+                int.TryParse(disc.GetValue("userId").ToString(), out userId);
                 if (userId != 0)
                 {
                     try
@@ -165,7 +168,7 @@ namespace UMF.Controllers
                 model.discussions.Add(tmp);
             }
 
-            return PartialView("UMFCategory", model);
+            return PartialView("UMF_Category", model);
         }
 
         /// <summary>
@@ -250,7 +253,7 @@ namespace UMF.Controllers
                 {
                     try
                     {
-                        answerm.writer = Member.GetAllAsList().SingleOrDefault(x => x.Id == userId);
+                        answerm.writer = Member.GetAllAsList().SingleOrDefault(x => x.Id == auserId);
                     }
                     catch { answerm.writer = null; }
                 }
@@ -262,7 +265,7 @@ namespace UMF.Controllers
                 model.answers.Add(answerm);
             }
 
-            return PartialView("UMFDiscussion", model);
+            return PartialView("UMF_Discussion", model);
         }
 
         [ChildActionOnly]
@@ -270,13 +273,13 @@ namespace UMF.Controllers
         {
             if (discussion == 0)
             {
-                return PartialView("UMFCreateDiscussion", new UMFCreateDiscussionModel() { parent = parent });
+                return PartialView("UMF_CreateDiscussion", new UMFCreateDiscussionModel() { parent = parent });
             }
             else
             {
                 var cs = Services.ContentService;
                 var current = cs.GetById(discussion);
-                return PartialView("UMFCreateDiscussion",
+                return PartialView("UMF_CreateDiscussion",
                     new UMFCreateDiscussionModel()
                     {
                         id = discussion,
@@ -312,6 +315,7 @@ namespace UMF.Controllers
                 var newDiscusssion = cs.CreateContent(model.name, cs.GetById(model.parent), "UMF_Discussion");
                 newDiscusssion.SetValue("bodyText", model.text);
                 newDiscusssion.SetValue("userId", userId);
+                newDiscusssion.SetValue("sticky", false);
                 cs.SaveAndPublish(newDiscusssion);
 
                 //Insert new count of posts to the member and update karma
@@ -359,13 +363,13 @@ namespace UMF.Controllers
         {
             if (answer == 0)
             {
-                return PartialView("UMFCreateAnswer", new UMFCreateAnswerModel() { parent = parent });
+                return PartialView("UMF_CreateAnswer", new UMFCreateAnswerModel() { parent = parent });
             }
             else
             {
                 var cs = Services.ContentService;
                 var current = cs.GetById(answer);
-                return PartialView("UMFCreateAnswer",
+                return PartialView("UMF_CreateAnswer",
                     new UMFCreateAnswerModel()
                     {
                         id = answer,
@@ -420,6 +424,27 @@ namespace UMF.Controllers
                         member.getProperty("karma").Value = karma + settings.KarmaForAnswer;
                     }
                     member.Save();
+                }
+
+                //Send Notification email
+                var node = Umbraco.AssignedContentItem;
+                //Loop through each relation to get member wich want to get notified
+                var rs = Services.RelationService;
+                foreach (var rel in rs.GetByParentOrChildId(Umbraco.AssignedContentItem.Id).Where(x => x.RelationType.Alias == "UMF_EmailNotification"))
+                {
+                    try
+                    {
+                        var member = new Member(rel.ParentId);
+                        new MailController()
+                            .SendNotificationEmail(
+                            member.Email,
+                            Umbraco.AssignedContentItem.GetPropertyValue<string>("notificationSubject", true, "New Notification on Forum"),
+                            Umbraco.AssignedContentItem.GetPropertyValue<string>("fromEmail", true, "noreply@" + Request.Url.Host),
+                            Umbraco.TypedContent(model.parent),
+                            CultureInfo.CurrentCulture.TwoLetterISOLanguageName.ToUpper()
+                            ).Deliver();
+                    }
+                    catch (Exception ex) { LogHelper.Error<UMFSurfaceController>("Failed to send notification email", ex); }
                 }
             }
             else
@@ -478,7 +503,7 @@ namespace UMF.Controllers
                 };
                 results.Add(model);
             }
-            return PartialView("UMFSearch", results);
+            return PartialView("UMF_Search", results);
         }
 
         [HttpPost]
@@ -504,11 +529,56 @@ namespace UMF.Controllers
                 //Save the changes
                 cs.SaveAndPublish(current);
 
-                return PartialView("UMFRatingSuccess");
+                return PartialView("UMF_RatingSuccess");
             }
             catch {
-                return PartialView("UMFRatingError");
+                return PartialView("UMF_RatingError");
             }
+        }
+
+        [ChildActionOnly]
+        public ActionResult GetNotificationForm(int id)
+        {
+            var relType = Services.RelationService.GetRelationTypeByAlias("UMF_EmailNotification");
+
+            if (Services.RelationService.GetAllRelationsByRelationType(relType.Id).SingleOrDefault(x => x.ParentId == Member.GetCurrentMember().Id && x.ChildId == id) != null)
+            {
+                return PartialView("UMF_OptOut", new NotificationModel() { id = id });
+            }
+            else
+            {
+                return PartialView("UMF_OptIn", new NotificationModel() { id = id });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult OptIn(int id)
+        {
+            try
+            {
+                var rs = Services.RelationService;
+                //rs.Relate(Member.GetCurrentMember(), , "UMF_EmailNotification");
+                var relation = new Relation(Member.GetCurrentMember().Id, id, rs.GetRelationTypeByAlias("UMF_EmailNotification"));
+                rs.Save(relation);
+                return RedirectToCurrentUmbracoPage();
+            }
+            catch { return RedirectToCurrentUmbracoPage(); }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult OptOut(int id)
+        {
+            try
+            {
+                var rs = Services.RelationService;
+                //rs.Relate(Member.GetCurrentMember(), , "UMF_EmailNotification");
+                var relation = rs.GetByChildId(id).SingleOrDefault(x => x.ParentId == Member.GetCurrentMember().Id);
+                rs.Delete(relation);
+                return RedirectToCurrentUmbracoPage();
+            }
+            catch { return RedirectToCurrentUmbracoPage(); }
         }
 
         private UMFSettingsModel GetSettings(int currentNode)

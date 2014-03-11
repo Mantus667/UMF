@@ -16,6 +16,12 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">.\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -35,6 +41,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ActionMailer.Net">
+      <HintPath>packages\ActionMailer.0.7.4\lib\Net40\ActionMailer.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="ActionMailer.Net.Mvc">
+      <HintPath>packages\ActionMailer.0.7.4\lib\Net40\ActionMailer.Net.Mvc.dll</HintPath>
+    </Reference>
     <Reference Include="businesslogic">
       <HintPath>..\packages\UmbracoCms.Core.6.1.1\lib\businesslogic.dll</HintPath>
     </Reference>
@@ -221,21 +233,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code\EmailHelper.cs" />
-    <Compile Include="Code\Helpers.cs" />
-    <Compile Include="Code\UmbracoStartup.cs" />
-    <Compile Include="Controllers\SurfaceControllers\AuthSurfaceController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\ProfileSurfaceController.cs" />
+    <Compile Include="Controllers\MailController.cs" />
     <Compile Include="Controllers\UMFController.cs" />
-    <Compile Include="Models\AuthModel.cs" />
-    <Compile Include="Models\ProfileModel.cs" />
+    <Compile Include="Models\NotificationModel.cs" />
     <Compile Include="Models\UMFAnswerModel.cs" />
     <Compile Include="Models\UMFCategoryModel.cs" />
     <Compile Include="Models\UMFDiscussionModel.cs" />
     <Compile Include="Models\UMFGroupModel.cs" />
     <Compile Include="Models\UMFSearchModel.cs" />
     <Compile Include="Models\UMFSettingsModel.cs" />
-    <Compile Include="Models\ViewProfileViewModel.cs" />
     <Compile Include="PackageActions\AddExamineIndex.cs" />
     <Compile Include="PackageActions\AddExamineIndexProvider.cs" />
     <Compile Include="PackageActions\AddExamineSearchProvider.cs" />
@@ -3344,22 +3350,21 @@
     <Content Include="config\404handlers.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Plugins\UMF\Views\Partials\UMFOverview.cshtml" />
-    <Content Include="App_Plugins\UMF\Views\Partials\UMFCategory.cshtml" />
-    <Content Include="App_Plugins\UMF\Views\Partials\UMFDiscussion.cshtml" />
-    <Content Include="App_Plugins\UMF\Views\Partials\UMFCreateDiscussion.cshtml" />
-    <Content Include="App_Plugins\UMF\Views\Partials\UMFCreateAnswer.cshtml" />
-    <Content Include="App_Plugins\UMF\Views\Partials\UMFSearch.cshtml" />
-    <Content Include="App_Plugins\UMF\Views\Partials\UMFRatingSuccess.cshtml" />
-    <Content Include="App_Plugins\UMF\Views\Partials\UMFRatingError.cshtml" />
+    <Content Include="App_Plugins\UMF\Views\Partials\UMF_Overview.cshtml" />
+    <Content Include="App_Plugins\UMF\Views\Partials\UMF_Category.cshtml" />
+    <Content Include="App_Plugins\UMF\Views\Partials\UMF_Discussion.cshtml" />
+    <Content Include="App_Plugins\UMF\Views\Partials\UMF_CreateDiscussion.cshtml" />
+    <Content Include="App_Plugins\UMF\Views\Partials\UMF_CreateAnswer.cshtml" />
+    <Content Include="App_Plugins\UMF\Views\Partials\UMF_Search.cshtml" />
+    <Content Include="App_Plugins\UMF\Views\Partials\UMF_RatingSuccess.cshtml" />
+    <Content Include="App_Plugins\UMF\Views\Partials\UMF_RatingError.cshtml" />
     <Content Include="App_Plugins\UMF\Views\web.config" />
     <Content Include="App_Browsers\Form.browser" />
     <Content Include="App_Browsers\w3cvalidator.browser" />
+    <Content Include="App_Plugins\UMF\Views\Partials\UMF_OptIn.cshtml" />
+    <Content Include="App_Plugins\UMF\Views\Partials\UMF_OptOut.cshtml" />
     <None Include="bin\amd64\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
     <None Include="bin\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
-    <Content Include="Views\UMF_Root.cshtml" />
-    <Content Include="Views\UMF_Category.cshtml" />
-    <Content Include="Views\UMF_Discussion.cshtml" />
     <Content Include="Views\ProfileSurface\ViewProfile.cshtml" />
     <Content Include="Views\ProfileSurface\EditProfile.cshtml" />
     <Content Include="Views\AuthSurface\ResetPassword.cshtml" />
@@ -3367,8 +3372,6 @@
     <Content Include="Views\AuthSurface\Login.cshtml" />
     <Content Include="Views\AuthSurface\ForgottenPassword.cshtml" />
     <Content Include="Views\Login.cshtml" />
-    <Content Include="Views\UMF_CreateDiscussion.cshtml" />
-    <Content Include="Views\UMF_Master.cshtml" />
     <None Include="scripts\jquery-2.0.2.min.map" />
     <None Include="scripts\UMF\ckeditor\CHANGES.md" />
     <None Include="scripts\UMF\ckeditor\LICENSE.md" />
@@ -3386,7 +3389,6 @@
     <None Include="scripts\UMF\ckeditor\samples\sample_posteddata.php" />
     <None Include="scripts\UMF\ckeditor\skins\moono\readme.md" />
     <Content Include="Views\Register.cshtml" />
-    <Content Include="Views\UMF_Search.cshtml" />
     <None Include="umbraco\Dashboard\Air\DesktopMediaUploader.air" />
     <Content Include="umbraco\Masterpages\default.Master" />
     <Content Include="umbraco\Masterpages\umbracoDialog.Master" />
@@ -3416,6 +3418,16 @@
     <None Include="umbraco_client\CodeMirror\Js\Mode\Razor\LICENSE" />
     <None Include="umbraco_client\CodeMirror\Js\Mode\Sieve\LICENSE" />
     <Content Include="Views\MemberOnlineTest.cshtml" />
+    <Content Include="Views\Mail\NotificationNewAnswerDE.html.cshtml" />
+    <Content Include="Views\Mail\NotificationNewAnswerEN.html.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\UMFCategory.cshtml" />
+    <Content Include="Views\UMFCreateDiscussion.cshtml" />
+    <Content Include="Views\UMFDiscussion.cshtml" />
+    <Content Include="Views\UMFMaster.cshtml" />
+    <Content Include="Views\UMFRoot.cshtml" />
+    <Content Include="Views\UMFSearch.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -3446,6 +3458,7 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
