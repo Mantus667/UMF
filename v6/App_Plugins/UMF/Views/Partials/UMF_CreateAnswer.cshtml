@@ -1,0 +1,33 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<UMF.Models.UMFCreateAnswerModel>
+@using UMF.Controllers
+@using System.Web.Mvc
+
+@{
+    Html.EnableClientValidation(true);
+    Html.EnableUnobtrusiveJavaScript(true);
+}
+
+@using (Html.BeginUmbracoForm<UMFSurfaceController>("HandleCreateAnswer", null, new { @class = "form" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.parent)
+    @Html.HiddenFor(model => model.id)
+
+    <fieldset>
+        <legend>@Umbraco.GetDictionaryValue("UMF_CreateAnswer")</legend>
+
+        <div class="control-group">
+            <div class="controls">
+                @Html.TextAreaFor(model => model.text, new { @class = "input-xxlarge ckeditor" })
+                @Html.ValidationMessageFor(model => model.text)
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <input type="submit" class="btn btn-primary" value="@Umbraco.GetDictionaryValue("UMF_Create")" />
+            <a href="@Umbraco.TypedContent(Model.parent).Url" class="btn">@Umbraco.GetDictionaryValue("UMF_Cancel")</a>
+        </div>
+
+    </fieldset>
+}

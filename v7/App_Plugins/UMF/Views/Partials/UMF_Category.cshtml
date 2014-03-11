@@ -1,0 +1,63 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<UMF.Models.UMFCategoryViewModel>
+
+@{
+    var typed = Umbraco.TypedContent(Model.id);
+    bool OnlyRegistered = true, allowRating = false;
+    bool.TryParse(typed.AncestorOrSelf("UMF_Root").GetPropertyValue("onlyRegisteredUsersCanPostAnswers").ToString(), out OnlyRegistered);
+    bool.TryParse(typed.AncestorOrSelf("UMF_Root").GetPropertyValue("allowRatingOfDiscussions").ToString(), out allowRating);
+}
+
+<div class="row-fluid">
+    <div class="span3">
+        <a href="@typed.Parent.Parent.Url" class="btn btn-info">@Umbraco.GetDictionaryValue("UMF_Back")</a>
+    </div>
+    @if ((OnlyRegistered && User.Identity.IsAuthenticated) || !OnlyRegistered)
+    {
+        <div class="span3 pull-right">
+            <a href="@typed.AncestorOrSelf("UMF_Root").Children.FirstOrDefault(x => x.DocumentTypeAlias == "UMF_CreateDiscussion").Url?category=@Model.id" class="btn pull-right btn-success">
+                <i class="icon-pencil"></i>@Umbraco.GetDictionaryValue("UMF_CreateDiscussion")</a>
+        </div>
+    }
+</div>
+
+<div class="umf_group">
+    <header>
+        <h2>@Model.name</h2>
+    </header>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@Umbraco.GetDictionaryValue("UMF_Name")
+                </th>
+                <th>@Umbraco.GetDictionaryValue("UMF_Rating")</th>
+                <th>@Umbraco.GetDictionaryValue("UMF_Replies")
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var discussion in Model.discussions)
+            {
+                var css = (discussion.hasAnswer) ? "success" : string.Empty;
+                <tr class="@css">
+                    <td>
+                        <h4>
+                            <a href="@discussion.url">@discussion.name</a>
+                        </h4>
+                        @if (discussion.writer != null)
+                        {
+                            <small>@Umbraco.GetDictionaryValue("UMF_CreatedBy") @discussion.writer.LoginName - @discussion.created</small>
+                        }
+                    </td>
+                    <td>
+                        @if (allowRating)
+                        {
+                            <div class="star" data-score="@discussion.rating"></div>
+                        }
+                    </td>
+                    <td>@discussion.number_of_answers @Umbraco.GetDictionaryValue("UMF_Answers")
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

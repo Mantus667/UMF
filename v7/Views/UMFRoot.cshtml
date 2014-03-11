@@ -1,0 +1,32 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@{
+    Layout = "UMFMaster.cshtml";
+    var search = Model.Content.Children.FirstOrDefault(x => x.DocumentTypeAlias == "UMF_Search");
+}
+
+<div class="container">
+    <div class="row-fluid">
+        <h2 class="span6">Forum</h2>
+        @if (null != search)
+        {
+            <form id="custom-search-form" class="form-search form-horizontal span3 pull-right" method="get" action="@search.Url">
+                <div class="input-append">
+                    <input type="text" class="search-query" placeholder="Search" name="search" required="required">
+                    <button type="submit" class="btn"><i class="icon-search"></i></button>
+                </div>
+            </form>
+        }
+    </div>
+
+    @if (null == Model.Content.GetPropertyValue("forumClosed")
+        || String.IsNullOrEmpty(Model.Content.GetPropertyValue("forumClosed").ToString())
+        || Model.Content.GetPropertyValue("forumClosed").ToString() == "True")
+    {
+        <p class="alert alert-warning"><i class="icon-ban-circle"></i> @Umbraco.GetDictionaryValue("UMF_ForumClosed")</p>
+    }
+    else
+    {
+        @Html.Action("GetOverviewData", "UMFSurface", new { area = "UMF", id = Model.Content.Id }) 
+    }
+
+</div>

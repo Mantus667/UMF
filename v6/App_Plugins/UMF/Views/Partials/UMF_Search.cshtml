@@ -1,0 +1,29 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<List<UMF.Models.UMFSearchResultModel>>
+
+<h3>@Umbraco.GetDictionaryValue("UMF_SearchResultsHeading")</h3>
+<div id="searchresults">
+@{
+    int count = Model.Count, counter = 0;
+    
+    if(Model.Count == 0) {
+        <div>@Umbraco.GetDictionaryValue("UMF_NoSearchResults")</div>
+    }
+    else
+    {
+        foreach (var hit in Model)
+        {
+            counter += 1;
+        
+            <div class="result">
+                <h4><a href="@hit.url" title="@hit.name">@hit.name</a></h4>
+                <p class="muted">@hit.url</p>
+            </div>
+    
+            if (counter != count)
+            {
+                <hr />
+            }
+        }
+    }
+}
+</ul>

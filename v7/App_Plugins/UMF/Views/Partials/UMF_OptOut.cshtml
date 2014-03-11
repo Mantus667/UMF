@@ -1,0 +1,8 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<UMF.Models.NotificationModel>
+
+@using (Html.BeginUmbracoForm<UMF.Controllers.UMFSurfaceController>("OptOut"))
+{
+    @Html.AntiForgeryToken();
+    <input type="hidden" name="id" value="@Model.id" />
+    <input type="submit" class="btn btn-link" value="@Umbraco.GetDictionaryValue("UMF_OptOut")" />
+}
